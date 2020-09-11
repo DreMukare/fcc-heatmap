@@ -19,3 +19,30 @@ body {
 	justify-content: center;
 	font-family: "Roboto", sans-serif;
 }
+
+rect:hover {
+	stroke: black;
+}
+
+#tooltip {
+	position: absolute;
+	width: 130px;
+	height: 60px;
+	text-align: center;
+	display: none;
+	background-color: rgba(0, 0, 0, 0.8);
+	color: #cbeaed;
+	border-radius: 4px;
+}
+
+#legend {
+	border: 2px solid black;
+	height: 44px;
+	width: 220px;
+}
+
+#legend > rect {
+	padding: 0;
+	margin: 0;
+	display: block;
+}

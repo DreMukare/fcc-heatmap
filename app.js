@@ -52,6 +52,9 @@ const createHeatMap = (data) => {
 	const w = 800;
 	const padding = 60;
 
+	const cellHeight = (h - 2 * padding) / months.length;
+	const cellWidth = w / Math.floor(data.length / months.length);
+
 	const xScale = d3
 		.scaleLinear()
 		.domain([d3.min(data, (d) => d[0]), d3.max(data, (d) => d[0])])
@@ -62,13 +65,44 @@ const createHeatMap = (data) => {
 		.domain([0, 11])
 		.range([padding, h - padding]);
 
-	console.log(data);
+	const tempScale = d3
+		.scaleLinear()
+		.domain([d3.min(data, (d) => d[3]), d3.max(data, (d) => d[3])])
+		.range([0, 11]);
 
 	const svg = d3
 		.select("#container")
 		.append("svg")
 		.attr("width", w)
 		.attr("height", h);
+
+	svg
+		.selectAll("rect")
+		.data(data)
+		.enter()
+		.append("rect")
+		.attr("class", "cell")
+		.attr("data-month", (d) => d[1] - 1)
+		.attr("data-year", (d) => d[0])
+		.attr("data-temp", (d) => d[3])
+		.attr("fill", (d) => colors[Math.floor(tempScale(d[3]))])
+		.attr("x", (d) => xScale(d[0]))
+		.attr("y", (d) => yScale(d[1] - 1))
+		.attr("width", cellWidth)
+		.attr("height", cellHeight - 2)
+		.on("mouseover", (d, i) => {
+			svg.append("tooltip");
+			tooltip.style.top = yScale(i[1]) + 45 + "px";
+			tooltip.style.left = xScale(i[0]) + 180 + "px";
+			tooltip.style.display = "block";
+			tooltip.setAttribute("data-year", i[0]);
+			tooltip.innerHTML = `${i[0]} - ${months[i[1]]} <br> ${i[3].toFixed(
+				2
+			)}℃ <br> ${i[2].toFixed(2)}℃`;
+		})
+		.on("mouseout", () => {
+			tooltip.style.display = "none";
+		});
 
 	const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
 	const yAxis = d3.axisLeft(yScale).tickFormat((month) => {
@@ -88,4 +122,20 @@ const createHeatMap = (data) => {
 		.attr("transform", `translate(${padding}, 0)`)
 		.attr("id", "y-axis")
 		.call(yAxis);
+
+	const legend = d3
+		.select("#legend")
+		.append("svg")
+		.attr("width", 220)
+		.attr("height", 40);
+	legend
+		.selectAll("rect")
+		.data(colors)
+		.enter()
+		.append("rect")
+		.attr("x", (d, i) => i * 20)
+		.attr("y", 0)
+		.attr("width", (d) => 200 / colors.length)
+		.attr("height", 40)
+		.attr("fill", (d) => d);
 };
